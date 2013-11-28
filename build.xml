@@ -75,7 +75,7 @@
         </copy>
         
         <!-- Zip Result -->
-        <zip destfile="${dir.build}/KingdomsOfArden-HeroesSkills.zip">
+        <zip destfile="${dir.build}/Skills.zip">
             <fileset dir="${dir.build}" includes="**/*.jar"/>
         </zip>
         
