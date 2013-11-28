@@ -21,7 +21,7 @@ public class SkillRend extends TargettedSkill {
     public SkillRend(Heroes plugin) {
         super(plugin, "Rend");
         this.setTypes(SkillType.HARMFUL, SkillType.SILENCABLE, SkillType.DAMAGING);
-        this.setDescription("Rends a target within $0 blocks, causing a bleed effect for $1 ticks dealing $2 damage per tick ($3 ticks per second). CD: $4 Seconds");
+        this.setDescription("Rends a target within $0 blocks, dealing $1 damage and causing a bleed effect for $2 ticks dealing $3 damage per tick ($4 ticks per second). CD: $5 Seconds");
         this.setIdentifiers("skill rend");
         this.setUsage("/skill rend");
     }
@@ -36,16 +36,25 @@ public class SkillRend extends TargettedSkill {
     
     @Override
     public SkillResult use(Hero hero, LivingEntity target, String[] args) {
+        
         if(target == null) {
             return SkillResult.INVALID_TARGET;
         }
         long duration = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION.node(), 5000, false) 
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION_INCREASE.node(), 0, false);
+        double baseDamage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 30, false) 
+                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 1, false);
         double damage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_TICK.node(), 10, false) 
-                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0, false);
+                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, "tick-damage-increase", 0, false);
         long period = SkillConfigManager.getUseSetting(hero, this, SkillSetting.PERIOD.node(), 1000, false);
-        RendBleedEffect effect = new RendBleedEffect(this, period, duration, damage, hero.getPlayer());
-        plugin.getCharacterManager().getCharacter(target).addEffect(effect);
+        if(Skill.damageCheck(hero.getPlayer(),target)) {
+            addSpellTarget(target,hero);
+            Skill.damageEntity(target,hero.getEntity(),baseDamage,DamageCause.ENTITY_ATTACK,true);
+            RendBleedEffect effect = new RendBleedEffect(this, period, duration, damage, hero.getPlayer());
+            plugin.getCharacterManager().getCharacter(target).addEffect(effect);
+        } else {
+            return SkillResult.INVALID_TARGET;
+        }
         return SkillResult.NORMAL;
     }
 
@@ -55,8 +64,10 @@ public class SkillRend extends TargettedSkill {
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE_INCREASE.node(), 0, false);
         long duration = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION.node(), 5000, false) 
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION_INCREASE.node(), 0, false);
+        double baseDamage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 30, false) 
+                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 1, false);
         double damage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_TICK.node(), 10, false) 
-                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0, false);
+                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, "tick-damage-increase", 0, false);
         long period = SkillConfigManager.getUseSetting(hero, this, SkillSetting.PERIOD.node(), 1000, false);
         
         DecimalFormat dF = new DecimalFormat("##.###");
@@ -70,10 +81,11 @@ public class SkillRend extends TargettedSkill {
         
         return getDescription()
                 .replace("$0", maxDist+"")
-                .replace("$1", tickCount + "")
-                .replace("$2", damage + "")
-                .replace("$3", dF.format(freq))
-                .replace("$4", dF.format(cooldown * 0.001));
+                .replace("$1", baseDamage+"")
+                .replace("$2", tickCount + "")
+                .replace("$3", damage + "")
+                .replace("$4", dF.format(freq))
+                .replace("$5", dF.format(cooldown * 0.001));
     }
     
     @Override
@@ -83,8 +95,10 @@ public class SkillRend extends TargettedSkill {
         node.set(SkillSetting.MAX_DISTANCE_INCREASE.node(), 0);
         node.set(SkillSetting.DURATION.node(), 5000);
         node.set(SkillSetting.DURATION_INCREASE.node(), 0);
+        node.set(SkillSetting.DAMAGE.node(),30);
+        node.set(SkillSetting.DAMAGE_INCREASE.node(),1);
         node.set(SkillSetting.DAMAGE_TICK.node(),10);
-        node.set(SkillSetting.DAMAGE_INCREASE.node(), 0.1);
+        node.set("tick-damage-increase", 0.1);
         node.set(SkillSetting.PERIOD.node(),1000);
         node.set(SkillSetting.COOLDOWN.node(), 30000);
         node.set(SkillSetting.COOLDOWN_REDUCE.node(), 500);
