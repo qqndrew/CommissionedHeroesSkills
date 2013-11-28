@@ -83,6 +83,12 @@ public class SkillStampede extends ActiveSkill {
             
         }
         
+        @Override
+        public void removeFromHero(Hero h) {
+            Player p = h.getPlayer();
+            p.setVelocity(new Vector(0,0,0)); //FULL STOP
+        }
+        
     }
     
     @Override
