@@ -23,24 +23,32 @@ import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
 import com.herocraftonline.heroes.characters.skill.SkillType;
 
-public class SkillWarStomp extends ActiveSkill {
+public class SkillStampede extends ActiveSkill {
 
-    public SkillWarStomp(Heroes plugin) {
-        super(plugin, "Warstomp");
+    public SkillStampede(Heroes plugin) {
+        super(plugin, "Stampede");
         setDescription("On use: for the next $0 seconds the user is propelled forward at a great rate dealing $1 damage to everyone within a $2 radius and knocking them up. CD: $3 seconds");
         setArgumentRange(0,0);
-        setIdentifiers("skill warstomp", "skill seismicshard");
-        setUsage("/skill warstomp");
+        setIdentifiers("skill stampede");
+        setUsage("/skill Stampede");
         setTypes(SkillType.PHYSICAL, SkillType.HARMFUL);
     }
+    
+    public class StampedeExclusionEffect extends ExpirableEffect {
 
-    public class WarStompPropulsionEffect extends PeriodicExpirableEffect {
+        public StampedeExclusionEffect(Skill skill, Heroes plugin) {
+            super(skill, plugin, "StampedeExclusion", 10000);
+        }
+        
+    }
+    
+    public class StampedePropulsionEffect extends PeriodicExpirableEffect {
 
         private double damage;
         private int range;
 
-        public WarStompPropulsionEffect(Skill skill, Heroes plugin, long duration, double damage, int range) {
-            super(skill, plugin, "WarStompPropulsionEffect", 200, duration);
+        public StampedePropulsionEffect(Skill skill, Heroes plugin, long duration, double damage, int range) {
+            super(skill, plugin, "StampedePropulsionEffect", 200, duration);
             this.damage = damage;
             this.range = range;
         }
@@ -62,12 +70,12 @@ public class SkillWarStomp extends ActiveSkill {
                     LivingEntity lE = (LivingEntity)e;
                     if(Skill.damageCheck(hero.getPlayer(), lE)) {
                         CharacterTemplate cT = plugin.getCharacterManager().getCharacter(lE);
-                        if(!cT.hasEffect("WarStompKnockupEffect")) {
+                        if(!cT.hasEffect("StampedeExclusion")) {
                             skill.addSpellTarget(lE, hero);
                             Skill.damageEntity(lE, hero.getPlayer(), damage, DamageCause.ENTITY_ATTACK);
                             Vector v = new Vector(0,3,0);
                             lE.setVelocity(v);
-                            cT.addEffect(new ExpirableEffect(skill, plugin, "WarStompKnockupEffect", 10000));
+                            cT.addEffect(new StampedeExclusionEffect(skill,plugin));
                         }
                     }
                 }
@@ -85,7 +93,7 @@ public class SkillWarStomp extends ActiveSkill {
         int range = SkillConfigManager.getUseSetting(hero, this, SkillSetting.RADIUS.node(), 5, false);
         long duration = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION.node(), 3000, false) 
                 + SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION_INCREASE.node(), 100, false) * hero.getLevel(); 
-        hero.addEffect(new WarStompPropulsionEffect(this, plugin, duration, damage, range));
+        hero.addEffect(new StampedePropulsionEffect(this, plugin, duration, damage, range));
         return SkillResult.NORMAL;
     }
 
