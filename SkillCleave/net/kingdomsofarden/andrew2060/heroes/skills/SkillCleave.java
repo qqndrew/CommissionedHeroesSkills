@@ -30,6 +30,7 @@ public class SkillCleave extends ActiveSkill {
 
     @Override
     public SkillResult use(Hero hero, String[] args) {
+        broadcastExecuteText(hero);
         boolean threeDimensionalArc = SkillConfigManager.getUseSetting(hero, this, "three-dimensional-arc", false);
         int dist = (int) (SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE.node(), 3, false) + 
                 SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE_INCREASE.node(), 0.02, false) * hero.getLevel());

@@ -36,7 +36,6 @@ public class SkillRend extends TargettedSkill {
     
     @Override
     public SkillResult use(Hero hero, LivingEntity target, String[] args) {
-        
         if(target == null) {
             return SkillResult.INVALID_TARGET;
         }
@@ -48,6 +47,7 @@ public class SkillRend extends TargettedSkill {
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, "tick-damage-increase", 0, false);
         long period = SkillConfigManager.getUseSetting(hero, this, SkillSetting.PERIOD.node(), 1000, false);
         if(Skill.damageCheck(hero.getPlayer(),target)) {
+            broadcastExecuteText(hero);
             addSpellTarget(target,hero);
             Skill.damageEntity(target,hero.getEntity(),baseDamage,DamageCause.ENTITY_ATTACK,true);
             RendBleedEffect effect = new RendBleedEffect(this, period, duration, damage, hero.getPlayer());
