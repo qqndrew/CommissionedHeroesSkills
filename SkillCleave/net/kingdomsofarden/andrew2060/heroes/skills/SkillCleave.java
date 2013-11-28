@@ -2,6 +2,7 @@ package net.kingdomsofarden.andrew2060.heroes.skills;
 
 import java.text.DecimalFormat;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
@@ -46,6 +47,7 @@ public class SkillCleave extends ActiveSkill {
             attackVec.setY(0);
         }
         attackVec.normalize(); //Length to zero for future dot product calculations
+        boolean foundTarget = false;
         for(Entity e : hero.getPlayer().getNearbyEntities(dist,dist,dist)) {
             if(e instanceof LivingEntity) {
                 LivingEntity lE = (LivingEntity)e;
@@ -61,13 +63,19 @@ public class SkillCleave extends ActiveSkill {
                 double deviation = Math.acos(dot);
                 if(deviation < arc) { //The target is within the arc we wish to affect
                     if(Skill.damageCheck(hero.getPlayer(), lE)) {
+                        foundTarget = true;
                         addSpellTarget(lE, hero);
                         Skill.damageEntity(lE, hero.getEntity(), damage, DamageCause.ENTITY_ATTACK);
                     }
                 }
             }
         }
-        return SkillResult.NORMAL;
+        if(foundTarget) {
+            return SkillResult.NORMAL;
+        } else {
+            hero.getPlayer().sendMessage(ChatColor.GRAY + "There were no valid targets to cleave!");
+            return SkillResult.INVALID_TARGET_NO_MSG;
+        }
     }
 
     @Override
