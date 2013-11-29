@@ -73,7 +73,7 @@ public class SkillStampede extends ActiveSkill {
                         if(!cT.hasEffect("StampedeExclusion")) {
                             skill.addSpellTarget(lE, hero);
                             Skill.damageEntity(lE, hero.getPlayer(), damage, DamageCause.ENTITY_ATTACK);
-                            Vector v = new Vector(0,3,0);
+                            Vector v = new Vector(0,1,0);
                             lE.setVelocity(v);
                             cT.addEffect(new StampedeExclusionEffect(skill,plugin));
                         }
