@@ -13,7 +13,7 @@
 		</repository>
 		<repository>
 			<id>koa-repo</id>
-			<url>http://ci.kingdomsofarden.net/nexus/content/groups/public/</url>
+			<url>http://nexus.theyeticave.net/content/groups/public/</url>
 		</repository>
 	</repositories>
 	<url>www.kingdomsofarden.net</url>
