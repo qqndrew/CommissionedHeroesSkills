@@ -23,7 +23,7 @@ public class SkillCleave extends ActiveSkill {
 
     public SkillCleave(Heroes plugin) {
         super(plugin, "Cleave");
-        this.setDescription("On use, cleaves up to $0 blocks in front of the user in a $1 degree arc, dealing $2 damage. CD: $3 seconds");
+        this.setDescription("On use, cleaves up to $0 blocks in front of the user in a $1 degree arc, dealing $2% weapon damage. CD: $3 seconds");
         this.setArgumentRange(0, 0);
         this.setIdentifiers("skill cleave");
         this.setTypes(SkillType.DAMAGING, SkillType.HARMFUL, SkillType.PHYSICAL);
@@ -36,8 +36,9 @@ public class SkillCleave extends ActiveSkill {
                 SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE_INCREASE.node(), 0.02, false) * hero.getLevel());
         double arc = SkillConfigManager.getUseSetting(hero, this, "arc-angle-base", 15, false) 
                 + SkillConfigManager.getUseSetting(hero, this, "arc-angle-per-level", 0.1, false) * hero.getLevel();
-        double damage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 30, false) 
-                + SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0, false) * hero.getLevel();
+        double damage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 1, false) 
+                + SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0.01, false) * hero.getLevel();
+        damage *= plugin.getDamageManager().getItemDamage(hero.getPlayer().getItemInHand().getType(), hero.getPlayer()); //Scale with weapon
         //The input is in degrees, we must convert to radians because that is what the Math acos function returns
         arc *= Math.PI/180.00;
         Location castLoc = hero.getPlayer().getLocation();
@@ -84,14 +85,14 @@ public class SkillCleave extends ActiveSkill {
                 SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE_INCREASE.node(), 0.02, false) * hero.getLevel());
         double arc = SkillConfigManager.getUseSetting(hero, this, "arc-angle-base", 15, false) 
                 + SkillConfigManager.getUseSetting(hero, this, "arc-angle-per-level", 0.1, false) * hero.getLevel();
-        double damage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 30, false) 
-                + SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0, false) * hero.getLevel();
+        double damage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 1, false) 
+                + SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0.01, false) * hero.getLevel();
         double cooldown = SkillConfigManager.getUseSetting(hero, this, SkillSetting.COOLDOWN.node(), 60000, false)
                 - SkillConfigManager.getUseSetting(hero, this, SkillSetting.COOLDOWN_REDUCE.node(), 500, false);
         DecimalFormat dF = new DecimalFormat("##.##");
         return getDescription().replace("$0",dist+"")
                 .replace("$1",dF.format(arc*2))
-                .replace("$2", dF.format(damage))
+                .replace("$2", dF.format(damage*100))
                 .replace("$3", dF.format(cooldown * 0.001));
     }
     
@@ -100,8 +101,8 @@ public class SkillCleave extends ActiveSkill {
         ConfigurationSection node = super.getDefaultConfig();
         node.set(SkillSetting.MAX_DISTANCE.node(), 3);
         node.set(SkillSetting.MAX_DISTANCE_INCREASE.node(),0.02);
-        node.set(SkillSetting.DAMAGE.node(), 30);
-        node.set(SkillSetting.DAMAGE_INCREASE.node(),0);
+        node.set(SkillSetting.DAMAGE.node(), 1);
+        node.set(SkillSetting.DAMAGE_INCREASE.node(),0.01);
         node.set(SkillSetting.COOLDOWN.node(), 60000);
         node.set(SkillSetting.COOLDOWN_REDUCE.node(), 500);
         node.set("arc-angle-base", 15);
