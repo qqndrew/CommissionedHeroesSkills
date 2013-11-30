@@ -1,7 +1,9 @@
 package net.kingdomsofarden.andrew2060.heroes.skills;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -10,12 +12,14 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import com.herocraftonline.heroes.Heroes;
 import com.herocraftonline.heroes.api.SkillResult;
 import com.herocraftonline.heroes.characters.Hero;
+import com.herocraftonline.heroes.characters.effects.EffectType;
 import com.herocraftonline.heroes.characters.effects.PeriodicDamageEffect;
 import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
 import com.herocraftonline.heroes.characters.skill.SkillType;
 import com.herocraftonline.heroes.characters.skill.TargettedSkill;
+import com.herocraftonline.heroes.util.Messaging;
 
 public class SkillRend extends TargettedSkill {
 
@@ -34,6 +38,109 @@ public class SkillRend extends TargettedSkill {
         }
         
     }
+    
+    //--Code taken from heroes TargettedSkill class for override purposes
+    @Override
+    public SkillResult use(Hero hero, String[] args) {
+        int maxDistance = SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE, 15, false);
+        final double distBonus = SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE_INCREASE, 0.0, false) * hero.getSkillLevel(this);
+        maxDistance += (int) distBonus;
+        if (hero.hasEffectType(EffectType.BLIND)) {
+            Messaging.send(hero.getPlayer(), "You can't target anything while blinded!");
+            return SkillResult.INVALID_TARGET_NO_MSG;
+        }
+        final LivingEntity target = getTarget(hero, maxDistance, args);
+        
+        if (target == null) {
+            hero.getPlayer().sendMessage(ChatColor.GRAY + "No valid targets found!"); //Send message if no valid targets
+            return SkillResult.INVALID_TARGET_NO_MSG;
+        }
+        else if ((args.length > 1) && (target != null)) {
+            args = Arrays.copyOfRange(args, 1, args.length);
+        }
+
+        if (target != null && (target instanceof Player)) {
+            final Hero tHero = plugin.getCharacterManager().getHero((Player) target);
+            if (tHero.hasEffectType(EffectType.UNTARGETABLE)) {
+                Messaging.send(hero.getPlayer(), "You cannot currently target this player!");
+                return SkillResult.INVALID_TARGET_NO_MSG;
+            }
+            else if (tHero.hasEffectType(EffectType.UNTARGETABLE_NO_MSG)) {
+                return SkillResult.INVALID_TARGET_NO_MSG;
+            }
+        }
+
+        final SkillResult result = use(hero, target, args);
+        if (this.isType(SkillType.INTERRUPT) && result.equals(SkillResult.NORMAL) && (target instanceof Player)) {
+            final Hero tHero = plugin.getCharacterManager().getHero((Player) target);
+            if (tHero.getDelayedSkill() != null) {
+                tHero.cancelDelayedSkill();
+                tHero.setCooldown("global", Heroes.properties.globalCooldown + System.currentTimeMillis());
+            }
+        }
+        return result;
+    }
+    
+    private LivingEntity getTarget(Hero hero, int maxDistance, String[] args) {
+        final Player player = hero.getPlayer();
+        LivingEntity target = null;
+        if (args.length > 0) {
+            target = plugin.getServer().getPlayer(args[0]);
+            if (target == null) {
+                Messaging.send(player, "Invalid target!");
+                return null;
+            }
+            if (!target.getLocation().getWorld().equals(player.getLocation().getWorld())) {
+                Messaging.send(player, "Target is in a different dimension.");
+                return null;
+            }
+            final int distSq = maxDistance * maxDistance;
+            if (target.getLocation().distanceSquared(player.getLocation()) > distSq) {
+                Messaging.send(player, "Target is too far away.");
+                return null;
+            }
+            if (!inLineOfSight(player, (Player) target)) {
+                Messaging.send(player, "Sorry, target is not in your line of sight!");
+                return null;
+            }
+            if (target.isDead() || (target.getHealth() == 0)) {
+                Messaging.send(player, "You can't target the dead!");
+                return null;
+            }
+        }
+        if (target == null) {
+            target = getPlayerTarget(player, maxDistance);
+            if (this.isType(SkillType.HEAL)) {
+                if ((target instanceof Player) && hero.hasParty() && hero.getParty().isPartyMember((Player) target)) {
+                    return target;
+                }
+                else if (target instanceof Player) {
+                    return null;
+                }
+                else {
+                    target = null;
+                }
+            }
+        }
+        if (target == null) {
+            // don't self-target harmful skills
+            if (this.isType(SkillType.HARMFUL)) {
+                return null;
+            }
+            target = player;
+        }
+
+        // Do a PvP check automatically for any harmful skill
+        if (this.isType(SkillType.HARMFUL)) {
+            if (player.equals(target) || hero.getSummons().contains(target) || !damageCheck(player, target)) {
+                Messaging.send(player, "Sorry, You can't damage that target!");
+                return null;
+            }
+        }
+        return target;
+    }
+    //--End Heroes Code
+    
     
     @Override
     public SkillResult use(Hero hero, LivingEntity target, String[] args) {
