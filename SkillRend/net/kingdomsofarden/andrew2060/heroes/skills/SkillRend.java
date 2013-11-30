@@ -22,7 +22,7 @@ public class SkillRend extends TargettedSkill {
     public SkillRend(Heroes plugin) {
         super(plugin, "Rend");
         this.setTypes(SkillType.HARMFUL, SkillType.SILENCABLE, SkillType.DAMAGING);
-        this.setDescription("Rends a target within $0 blocks, dealing $1 damage and causing a bleed effect for $2 ticks dealing $3 damage per tick ($4 ticks per second). CD: $5 Seconds");
+        this.setDescription("Rends a target within $0 blocks, dealing $1% weapon damage and causing a bleed effect for $2 ticks dealing $3 damage per tick ($4 ticks per second). CD: $5 Seconds");
         this.setIdentifiers("skill rend");
         this.setUsage("/skill rend");
     }
@@ -42,11 +42,12 @@ public class SkillRend extends TargettedSkill {
         }
         long duration = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION.node(), 5000, false) 
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION_INCREASE.node(), 0, false);
-        double baseDamage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 30, false) 
-                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 1, false);
+        double baseDamage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 1, false) 
+                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0.01, false);
         double damage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_TICK.node(), 10, false) 
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, "tick-damage-increase", 0, false);
         long period = SkillConfigManager.getUseSetting(hero, this, SkillSetting.PERIOD.node(), 1000, false);
+        baseDamage *= plugin.getDamageManager().getItemDamage(hero.getPlayer().getItemInHand().getType(), hero.getPlayer());
         if(Skill.damageCheck(hero.getPlayer(),target)) {
             broadcastExecuteText(hero);
             addSpellTarget(target,hero);
@@ -65,8 +66,8 @@ public class SkillRend extends TargettedSkill {
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE_INCREASE.node(), 0, false);
         long duration = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION.node(), 5000, false) 
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION_INCREASE.node(), 0, false);
-        double baseDamage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 30, false) 
-                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 1, false);
+        double baseDamage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 1, false) 
+                + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0.01, false);
         double damage = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_TICK.node(), 10, false) 
                 + hero.getLevel() * SkillConfigManager.getUseSetting(hero, this, "tick-damage-increase", 0, false);
         long period = SkillConfigManager.getUseSetting(hero, this, SkillSetting.PERIOD.node(), 1000, false);
@@ -82,9 +83,9 @@ public class SkillRend extends TargettedSkill {
         
         return getDescription()
                 .replace("$0", maxDist+"")
-                .replace("$1", baseDamage+"")
+                .replace("$1", dF.format(baseDamage * 100))
                 .replace("$2", tickCount + "")
-                .replace("$3", damage + "")
+                .replace("$3", dF.format(damage))
                 .replace("$4", dF.format(freq))
                 .replace("$5", dF.format(cooldown * 0.001));
     }
@@ -96,8 +97,8 @@ public class SkillRend extends TargettedSkill {
         node.set(SkillSetting.MAX_DISTANCE_INCREASE.node(), 0);
         node.set(SkillSetting.DURATION.node(), 5000);
         node.set(SkillSetting.DURATION_INCREASE.node(), 0);
-        node.set(SkillSetting.DAMAGE.node(),30);
-        node.set(SkillSetting.DAMAGE_INCREASE.node(),1);
+        node.set(SkillSetting.DAMAGE.node(),1);
+        node.set(SkillSetting.DAMAGE_INCREASE.node(),0.01);
         node.set(SkillSetting.DAMAGE_TICK.node(),10);
         node.set("tick-damage-increase", 0.1);
         node.set(SkillSetting.PERIOD.node(),1000);
