@@ -112,7 +112,7 @@ public class SkillStampede extends ActiveSkill {
                 + SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 1, false) * hero.getLevel();
         int range = SkillConfigManager.getUseSetting(hero, this, SkillSetting.RADIUS.node(), 5, false);
         long cooldown = SkillConfigManager.getUseSetting(hero, this, SkillSetting.COOLDOWN.node(), 3600000, false) 
-                + SkillConfigManager.getUseSetting(hero, this, SkillSetting.COOLDOWN_REDUCE.node(), 100, false) * hero.getLevel(); 
+                - SkillConfigManager.getUseSetting(hero, this, SkillSetting.COOLDOWN_REDUCE.node(), 100, false) * hero.getLevel(); 
         return getDescription()
                 .replace("$0", dF.format(duration*0.001))
                 .replace("$1", dF.format(damage))
