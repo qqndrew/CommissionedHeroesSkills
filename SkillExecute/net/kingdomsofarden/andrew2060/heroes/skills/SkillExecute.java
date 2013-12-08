@@ -31,8 +31,8 @@ public class SkillExecute extends TargettedSkill implements Listener {
         super(plugin, "Execute");
         this.setTypes(SkillType.HARMFUL, SkillType.SILENCABLE, SkillType.DAMAGING);
         this.setDescription("Tier 2 Rend: Rends a target within $0 blocks, dealing $1% weapon damage and causing a bleed effect for $2 ticks dealing $3 damage per tick ($4 ticks per second). While the bleed effect is active, all healing done is reduced by $5%. CD: $6 Seconds");
-        this.setIdentifiers("skill rend");
-        this.setUsage("/skill rend");
+        this.setIdentifiers("skill execute");
+        this.setUsage("/skill execute");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
