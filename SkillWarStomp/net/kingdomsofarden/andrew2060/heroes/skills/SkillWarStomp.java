@@ -52,7 +52,7 @@ public class SkillWarStomp extends ActiveSkill {
                 }
             }
         }
-        for(int i = (int) Math.ceil(range); i >= 0 && i > range - 3; i++) { //Limit to 3 circles
+        for(int i = (int) Math.ceil(range); i >= 0 && i > range - 3; i--) { //Limit to 3 circles
             List<Location> explosionLoc = circle(loc,10,1,false,false,0);
             long ticksPerFirework = Math.round(40.00/((double)explosionLoc.size()));
             for(final Location expLoc : explosionLoc) {
