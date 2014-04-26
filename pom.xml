@@ -3,24 +3,21 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.kingdomsofarden.andrew2060</groupId>
 	<artifactId>CommissionedSkills</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>Andrew2060-ComissionedHeroesSkills</name>
+	<url>www.kingdomsofarden.net</url>
+	<description>Paid Skill Development</description>
 
 	<repositories>
 		<repository>
 			<id>spigot-repo</id>
 			<url>http://repo.md-5.net/content/repositories/snapshots/</url>
 		</repository>
-        <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
-        </repository>
 		<repository>
-			<id>koa-repo</id>
-			<url>http://ci.kingdomsofarden.net/nexus/content/groups/public/</url>
+			<id>bukkit-repo</id>
+			<url>http://repo.bukkit.org/content/groups/public/</url>
 		</repository>
 	</repositories>
-	<url>www.kingdomsofarden.net</url>
 	<build>
 		<plugins>
 			<plugin>
@@ -44,7 +41,7 @@
 		<dependency>
 			<groupId>com.herocraftonline.heroes</groupId>
 			<artifactId>Heroes</artifactId>
-			<version>1.5.5-SNAPSHOT</version>
+			<version>1.5.5.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
@@ -52,5 +49,4 @@
 			<version>1.6.4-R0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
-	<description>Paid Skill Development</description>
 </project>
